@@ -3,7 +3,7 @@ import { useState } from "react";
 
 const useFetch = (cb, options = {}) => {
 
-    const [data, setData] = useState(undefined);
+    const [data, setData] = useState([]);
     const [loading, setLoading] = useState(null);
     const [error, setError] = useState(null);
 
@@ -18,8 +18,8 @@ const useFetch = (cb, options = {}) => {
                 template: "supabase",
             });
 
-            const responce = await cb(supabaseAccessToken, options, ...args);
-            setData(responce);
+            const response = await cb(supabaseAccessToken, options, ...args);
+            setData(response || []);
             setError(null);
         } catch (error) {
             setError(error);

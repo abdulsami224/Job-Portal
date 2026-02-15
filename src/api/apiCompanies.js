@@ -1,6 +1,6 @@
 import supabaseClient from "@/utils/supabase";
 
-export const getCompanies = async () => {
+export const getCompanies = async (token) => {
     const supabase = await supabaseClient(token);
 
     const { data, error } = await supabase.from("companies").select("*");
