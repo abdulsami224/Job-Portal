@@ -124,6 +124,7 @@ const JobListing = () => {
       </SelectGroup>
     </SelectContent>
   </Select>
+  
 
   <Button
     className="w-full"
