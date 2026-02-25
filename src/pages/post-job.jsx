@@ -22,6 +22,7 @@ import { Button } from '@/components/ui/button';
 import MDEditor from '@uiw/react-md-editor';
 import { addNewJob } from '@/api/apiJobs';
 import { useNavigate } from 'react-router-dom';
+import AddCompanyDrawer from '@/components/add-company-drawer';
 
 
 
@@ -149,6 +150,7 @@ const PostJob = () => {
                 </Select>
               )}
             />
+            <AddCompanyDrawer fetchCompanies={fnCompanies} />
           </div>
 
           {errors.location && (
@@ -162,7 +164,10 @@ const PostJob = () => {
               name="requirements"
               control={control}
               render={({ field }) => (
-                <MDEditor value={field.value} onChange={field.onChange} />
+                <MDEditor 
+                  value={field.value}
+                  onChange={field.onChange}
+                  data-color-mode="dark" />
               )}
             />
             {errors.requirements && (

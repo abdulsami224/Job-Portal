@@ -6,32 +6,66 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card'
 import { Heart, MapPinIcon, Trash2Icon } from 'lucide-react';
 import { Button } from './ui/button';
 import useFetch from '@/hooks/use-fetch';
-import { saveJob } from '@/api/apiJobs';
+import { deleteJob, saveJob, unsaveJob } from '@/api/apiJobs';
+import { BarLoader } from 'react-spinners';
 
 const JobCard = ({
     job,
     isMyJob = false,
     savedInit = false,
-    onJobSaved = () => {},
+    onJobSaved  = () => {},
 }) => {
 
     const [saved, setSaved] = useState(savedInit);
-    const {
-        fn: fnSavedJob,
-        data: savedJob,
-        loading: loadingSavedJob,
-    } = useFetch(saveJob, {
-        alreadySaved: saved,
-    });
 
     const { user } = useUser();
 
+    const {
+        loading: loadingDeleteJob,
+        fn: fnDeleteJob,
+    } = useFetch(deleteJob, {
+        job_id: job.id,
+    });
+
+
+    // const {
+    //     fn: fnSavedJob,
+    //     data: savedJob,
+    //     loading: loadingSavedJob,
+    // } = useFetch(saveJob);
+
+    const { fn: fnSaveJob , data: savedJob , loading: loadingSavedJob } = useFetch(saveJob);
+const { fn: fnUnsaveJob , data: unSavedJob , loading: loadingUnsavedJob } = useFetch(unsaveJob);
+
+
+    // const handleSaveJob = async () => {
+    //     await fnSavedJob({
+    //         user_id: user.id,
+    //         job_id: job.id,
+    //     });
+    //     onJobSaved ();
+    // }
+
     const handleSaveJob = async () => {
-        await fnSavedJob({
-            user_id: user.id,
-            job_id: job.id,
+      if (saved) {
+        await fnUnsaveJob({
+          user_id: user.id,
+          job_id: job.id,
         });
-        onJobSaved();
+        setSaved(false);
+      } else {
+        await fnSaveJob({
+          user_id: user.id,
+          job_id: job.id,
+        });
+        setSaved(true);
+      }
+    };
+
+
+    const handleDeleteJob = async () => {
+        await fnDeleteJob();
+        onJobSaved ();
     }
 
     useEffect(() => {
@@ -41,6 +75,9 @@ const JobCard = ({
     return (
         <>
             <Card className='flex flex-col '>
+                {loadingDeleteJob && (
+                    <BarLoader className='mb-4' width={'100%'} color='#36d7b7' />
+                )}
                 <CardHeader>
                     <CardTitle className='flex justify-between font-bold'>
                     {job.title}
@@ -50,6 +87,7 @@ const JobCard = ({
                             fill='red'
                             size={18}
                             className='text-red-300 cursor-pointer'
+                            onClick={handleDeleteJob}
                         />
                     )}
                     </CardTitle>
@@ -80,15 +118,14 @@ const JobCard = ({
                             onClick={handleSaveJob}
                             disabled={loadingSavedJob}
                         >
-                            {saved?
+                            {saved? (
                                 <Heart size={20} stroke='red' fill='red' />
-                                :
+                                ) : (
                                 <Heart size={20} />
+                                )
                             }
                         </Button>
-                    )}
-
-                    
+                    )}                    
                 </CardFooter>
             </Card>
         </>
@@ -96,3 +133,4 @@ const JobCard = ({
 }
 
 export default JobCard
+

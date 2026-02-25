@@ -15,6 +15,12 @@ import {
   SelectTrigger, 
   SelectValue,
 } from "@/components/ui/select"
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+} from "@/components/ui/pagination"
 import { City } from 'country-state-city';
 
 const JobListing = () => {
@@ -23,6 +29,9 @@ const JobListing = () => {
   const [location, setLocation] = useState("");
   const [company_id, setCompany_id] = useState("");
   const { isLoaded  } = useUser();
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const jobsPerPage = 6; 
 
   const {
     // loading: loadingCompanies,
@@ -44,12 +53,10 @@ const JobListing = () => {
     if (isLoaded) {
       fnCompanies();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoaded]);
 
   useEffect(() => {
     if (isLoaded) fnJobs();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoaded, location, company_id, searchQuery]);
 
 
@@ -69,6 +76,12 @@ const JobListing = () => {
     setCompany_id("");
     setLocation("");
   };
+    
+  const indexOfLastJob = currentPage * jobsPerPage;
+  const indexOfFirstJob = indexOfLastJob - jobsPerPage;
+  const currentJobs = jobs?.slice(indexOfFirstJob, indexOfLastJob);
+  const totalPages = Math.ceil((jobs?.length || 0) / jobsPerPage);
+
 
   if (!isLoaded) {
     return <BarLoader className="mb-4" width={"100%"} color="36d7b7" />;
@@ -142,8 +155,8 @@ const JobListing = () => {
 
       {loadingJobs === false && (
           <div className="mt-8 grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {jobs?.length ? (
-                  jobs.map((job) => {
+              {currentJobs?.length ? (
+                  currentJobs.map((job) => {
                       return <JobCard 
                         key={job.id} 
                         job={job} 
@@ -155,6 +168,25 @@ const JobListing = () => {
               )}
           </div>
       )}
+
+      <Pagination className="mt-8">
+        <PaginationContent>
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <PaginationItem key={page}>
+              <PaginationLink
+                href="#"
+                isActive={currentPage === page}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setCurrentPage(page);
+                }}
+              >
+                {page}
+              </PaginationLink>
+            </PaginationItem>
+          ))}
+        </PaginationContent>
+      </Pagination>
     </div>
   );
 };

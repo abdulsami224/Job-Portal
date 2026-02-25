@@ -101,8 +101,9 @@ const handleStatusChange = (value) => {
       </h2>
       <MDEditor.Markdown
         source={job?.requirements}
-        className="bg-transparent sm:text-lg text-white" 
+        className="!bg-transparent !text-white max-w-none" 
       />
+      {console.log(job?.requirements)}
 
       {job?.recruiter_id !== user?.id && ( 
         <ApplyJobDrawer
