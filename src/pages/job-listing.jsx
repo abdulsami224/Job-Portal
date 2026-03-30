@@ -28,7 +28,7 @@ const JobListing = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [location, setLocation] = useState("");
   const [company_id, setCompany_id] = useState("");
-  const { isLoaded  } = useUser();
+  const { isLoaded, user } = useUser(); // ✅ add user
 
   const [currentPage, setCurrentPage] = useState(1);
   const jobsPerPage = 6; 
@@ -40,13 +40,14 @@ const JobListing = () => {
   } = useFetch(getCompanies);
 
   const {
-    loading: loadingJobs,
-    data: jobs,
-    fn: fnJobs,
+      loading: loadingJobs,
+      data: jobs,
+      fn: fnJobs,
   } = useFetch(getJobs, {
-    location,
-    company_id,
-    searchQuery,
+      location,
+      company_id,
+      searchQuery,
+      user_id: user?.id, // ✅ add this
   });
 
   useEffect(() => {
@@ -158,10 +159,11 @@ const JobListing = () => {
               {currentJobs?.length ? (
                   currentJobs.map((job) => {
                       return <JobCard 
-                        key={job.id} 
-                        job={job} 
-                        savedInit={job?.saved?.length > 0}
-                        />;
+                        key={job.id}
+                        job={job}
+                        savedInit={job?.saved?.length > 0} 
+                        onJobSaved={fnJobs}
+                      />;
                   })
               ) : (
                   <div>No jobs found.</div>

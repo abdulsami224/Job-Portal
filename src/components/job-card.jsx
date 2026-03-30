@@ -18,50 +18,28 @@ const JobCard = ({
 
     const [saved, setSaved] = useState(savedInit);
 
-    const { user } = useUser();
+    const { user, isLoaded } = useUser();
 
     const {
         loading: loadingDeleteJob,
         fn: fnDeleteJob,
     } = useFetch(deleteJob, {
-        job_id: job.id,
+        job_id: job?.id ?? null, // ✅ use optional chaining
     });
 
-
-    // const {
-    //     fn: fnSavedJob,
-    //     data: savedJob,
-    //     loading: loadingSavedJob,
-    // } = useFetch(saveJob);
-
     const { fn: fnSaveJob , data: savedJob , loading: loadingSavedJob } = useFetch(saveJob);
-const { fn: fnUnsaveJob , data: unSavedJob , loading: loadingUnsavedJob } = useFetch(unsaveJob);
-
-
-    // const handleSaveJob = async () => {
-    //     await fnSavedJob({
-    //         user_id: user.id,
-    //         job_id: job.id,
-    //     });
-    //     onJobSaved ();
-    // }
+    const { fn: fnUnsaveJob , data: unSavedJob , loading: loadingUnsavedJob } = useFetch(unsaveJob);
 
     const handleSaveJob = async () => {
-      if (saved) {
-        await fnUnsaveJob({
-          user_id: user.id,
-          job_id: job.id,
-        });
-        setSaved(false);
-      } else {
-        await fnSaveJob({
-          user_id: user.id,
-          job_id: job.id,
-        });
-        setSaved(true);
-      }
+        if (!user) return;  // ✅ extra safety guard
+        if (saved) {
+            await fnUnsaveJob({ user_id: user.id, job_id: job.id });
+            setSaved(false);
+        } else {
+            await fnSaveJob({ user_id: user.id, job_id: job.id });
+            setSaved(true);
+        }
     };
-
 
     const handleDeleteJob = async () => {
         await fnDeleteJob();
@@ -69,8 +47,14 @@ const { fn: fnUnsaveJob , data: unSavedJob , loading: loadingUnsavedJob } = useF
     }
 
     useEffect(() => {
-        if (savedJob!==undefined ) setSaved(savedJob?.length > 0); 
+        if (savedJob !== undefined) setSaved(savedJob?.length > 0);
     }, [savedJob]);
+
+    useEffect(() => {
+        if (unSavedJob !== undefined) setSaved(false);
+    }, [unSavedJob]);
+
+     if (!isLoaded || !job) return null;
 
     return (
         <>

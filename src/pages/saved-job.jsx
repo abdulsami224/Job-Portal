@@ -7,17 +7,17 @@ import JobCard from '@/components/job-card';
 
 const SaveJobs = () => {
 
-  const { isLoaded } = useUser();
+  const { isLoaded, user } = useUser(); 
 
   const {
-    loading: loadingSavedJobs,
-    data: SavedJobs,
-    fn: fnSavedJobs,
+      loading: loadingSavedJobs,
+      data: SavedJobs,
+      fn: fnSavedJobs,
   } = useFetch(getSavedJobs);
 
   useEffect(() => {
-    if (isLoaded) fnSavedJobs();
-  }, [isLoaded]);
+    if (isLoaded && user) fnSavedJobs({ user_id: user.id }); // ✅ pass user_id
+  }, [isLoaded, user]);
 
   if (!isLoaded || loadingSavedJobs) {
     return <BarLoader className="mb-4" width={"100%"} color="#36d7b7" />;
@@ -32,21 +32,22 @@ const SaveJobs = () => {
 
 
       {loadingSavedJobs === false && (
-          <div className="mt-8 grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {SavedJobs?.length ? (
-                  SavedJobs.map((saved) => {
-                      return <JobCard 
-                        key={saved.id} 
-                        job={saved?.job} 
-                        savedInit={true}
-                        onJobSaved={fnSavedJobs}
-                        />;
-                  })
-              ) : (
-                  <div>No Saved jobs found.</div>
-              )}
-          </div>
-      )}
+        <div className="mt-8 grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {SavedJobs?.length ? (
+                SavedJobs.filter(saved => saved.job)  // ✅ add this line
+                    .map((saved) => (
+                        <JobCard
+                            key={saved.id}
+                            job={saved.job}
+                            savedInit={true}
+                            onJobSaved={fnSavedJobs}
+                        />
+                    ))
+            ) : (
+                <div>No Saved jobs found.</div>
+            )}
+        </div>
+    )}
     </div>
   )
 }
